@@ -1,0 +1,6 @@
+domain: bwag.me
+layout:
+- go.kubebuilder.io/v3
+projectName: git-stats-exporter
+repo: bwag.me/git-stats-exporter
+version: "3"
