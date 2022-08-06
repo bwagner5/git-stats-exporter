@@ -1,0 +1,6 @@
+apiVersion: src.bwag.me/v1
+kind: Repo
+metadata:
+  name: repo-sample
+spec:
+  # TODO(user): Add fields here

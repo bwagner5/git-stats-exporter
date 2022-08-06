@@ -3,4 +3,14 @@ layout:
 - go.kubebuilder.io/v3
 projectName: git-stats-exporter
 repo: bwag.me/git-stats-exporter
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: bwag.me
+  group: src
+  kind: Repo
+  path: bwag.me/git-stats-exporter/api/v1
+  version: v1
 version: "3"
