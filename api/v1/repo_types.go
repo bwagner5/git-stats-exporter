@@ -20,22 +20,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // RepoSpec defines the desired state of Repo
 type RepoSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of Repo. Edit repo_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Owner is the github owner organization or user
+	Owner string `json:"owner"`
+	// Name is the git repository name
+	Name string `json:"name"`
 }
 
 // RepoStatus defines the observed state of Repo
 type RepoStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	State     *string      `json:"state,omitempty"`
+	LastQuery *metav1.Time `json:"lastQuery,omitempty"`
 }
 
 //+kubebuilder:object:root=true
