@@ -30,14 +30,15 @@ type RepoSpec struct {
 
 // RepoStatus defines the observed state of Repo
 type RepoStatus struct {
-	State     *string      `json:"state,omitempty"`
-	LastQuery *metav1.Time `json:"lastQuery,omitempty"`
+	State     *string     `json:"state,omitempty"`
+	LastQuery metav1.Time `json:"lastQuery,omitempty"`
 }
 
+//+kubebuilder:resource:path=repos
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// Repo is the Schema for the repoes API
+// Repo is the Schema for the repos API
 type Repo struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

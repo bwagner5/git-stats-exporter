@@ -1,6 +1,7 @@
 apiVersion: src.bwag.me/v1
 kind: Repo
 metadata:
-  name: repo-sample
+  name: aws-karpenter
 spec:
-  # TODO(user): Add fields here
+  owner: aws
+  name: karpenter
