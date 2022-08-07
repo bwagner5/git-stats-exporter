@@ -5,3 +5,22 @@ metadata:
 spec:
   owner: aws
   name: karpenter
+  ghTokenSecretRef: gh-token
+---
+apiVersion: src.bwag.me/v1
+kind: Repo
+metadata:
+  name: aws-node-termination-handler
+spec:
+  owner: aws
+  name: aws-node-termination-handler
+  ghTokenSecretRef: gh-token
+---
+apiVersion: src.bwag.me/v1
+kind: Repo
+metadata:
+  name: aws-ec2-instance-selector
+spec:
+  owner: aws
+  name: amazon-ec2-instance-selector
+  ghTokenSecretRef: gh-token

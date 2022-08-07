@@ -8,7 +8,7 @@ rules:
 - apiGroups:
   - src.bwag.me
   resources:
-  - repoes
+  - repos
   verbs:
   - create
   - delete
@@ -20,13 +20,13 @@ rules:
 - apiGroups:
   - src.bwag.me
   resources:
-  - repoes/finalizers
+  - repos/finalizers
   verbs:
   - update
 - apiGroups:
   - src.bwag.me
   resources:
-  - repoes/status
+  - repos/status
   verbs:
   - get
   - patch

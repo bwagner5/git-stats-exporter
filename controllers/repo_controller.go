@@ -22,11 +22,14 @@ import (
 	"time"
 
 	"github.com/aws/smithy-go/ptr"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	srcv1 "bwag.me/git-stats-exporter/api/v1"
 	"bwag.me/git-stats-exporter/pkg/repos"
@@ -38,9 +41,9 @@ type RepoReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=src.bwag.me,resources=repoes,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=src.bwag.me,resources=repoes/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=src.bwag.me,resources=repoes/finalizers,verbs=update
+//+kubebuilder:rbac:groups=src.bwag.me,resources=repos,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=src.bwag.me,resources=repos/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=src.bwag.me,resources=repos/finalizers,verbs=update
 
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
@@ -56,7 +59,25 @@ func (r *RepoReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if err := repos.New().EmitMetrics(ctx, repo.Spec.Owner, repo.Spec.Name); err != nil {
+	var repoMetrics *repos.Repos
+	if repo.Spec.GHTokenSecretRef != nil {
+		var ghtoken corev1.Secret
+		if err := r.Get(ctx, types.NamespacedName{Namespace: repo.Namespace, Name: *repo.Spec.GHTokenSecretRef}, &ghtoken); err != nil {
+			log.Error(err, "unable to fetch the secret reference")
+			return ctrl.Result{}, err
+		}
+		if token, ok := ghtoken.Data["token"]; ok {
+			repoMetrics = repos.New(ctx, token)
+		} else {
+			err := fmt.Errorf("unable to fetch the token key from the secret reference")
+			log.Error(err, "provide the token key under data in the secret")
+			return ctrl.Result{}, err
+		}
+	} else {
+		repoMetrics = repos.New(ctx, nil)
+	}
+
+	if err := repoMetrics.EmitMetrics(ctx, repo.Spec.Owner, repo.Spec.Name); err != nil {
 		log.Error(err, fmt.Sprintf("unable to emit Repo (%s/%s) metrics", repo.Spec.Owner, repo.Spec.Name))
 		return ctrl.Result{}, err
 	}
@@ -68,6 +89,7 @@ func (r *RepoReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
+	log.Info(fmt.Sprintf("Reconciled \"%s/%s\"", repo.Spec.Owner, repo.Spec.Name))
 	return ctrl.Result{RequeueAfter: 5 * time.Minute}, nil
 }
 
@@ -75,5 +97,6 @@ func (r *RepoReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 func (r *RepoReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&srcv1.Repo{}).
+		WithEventFilter(predicate.GenerationChangedPredicate{}).
 		Complete(r)
 }

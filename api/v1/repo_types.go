@@ -26,6 +26,8 @@ type RepoSpec struct {
 	Owner string `json:"owner"`
 	// Name is the git repository name
 	Name string `json:"name"`
+	//GHTokenSecretRef is a reference to the github token secret resource
+	GHTokenSecretRef *string `json:"ghTokenSecretRef,omitempty"`
 }
 
 // RepoStatus defines the observed state of Repo

@@ -1,4 +1,4 @@
-# permissions for end users to view repoes.
+# permissions for end users to view repos.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -7,7 +7,7 @@ rules:
 - apiGroups:
   - src.bwag.me
   resources:
-  - repoes
+  - repos
   verbs:
   - get
   - list
@@ -15,6 +15,6 @@ rules:
 - apiGroups:
   - src.bwag.me
   resources:
-  - repoes/status
+  - repos/status
   verbs:
   - get

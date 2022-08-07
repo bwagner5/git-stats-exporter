@@ -35,6 +35,10 @@ spec:
           spec:
             description: RepoSpec defines the desired state of Repo
             properties:
+              ghTokenSecretRef:
+                description: GHTokenSecretRef is a reference to the github token secret
+                  resource
+                type: string
               name:
                 description: Name is the git repository name
                 type: string

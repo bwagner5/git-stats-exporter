@@ -1,4 +1,4 @@
-# permissions for end users to edit repoes.
+# permissions for end users to edit repos.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -7,7 +7,7 @@ rules:
 - apiGroups:
   - src.bwag.me
   resources:
-  - repoes
+  - repos
   verbs:
   - create
   - delete
@@ -19,6 +19,6 @@ rules:
 - apiGroups:
   - src.bwag.me
   resources:
-  - repoes/status
+  - repos/status
   verbs:
   - get
