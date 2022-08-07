@@ -18,6 +18,8 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/aws/smithy-go/ptr"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	srcv1 "bwag.me/git-stats-exporter/api/v1"
+	"bwag.me/git-stats-exporter/pkg/repos"
 )
 
 // RepoReconciler reconciles a Repo object
@@ -53,7 +56,10 @@ func (r *RepoReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	//TODO: retrieve github stats
+	if err := repos.New().EmitMetrics(ctx, repo.Spec.Owner, repo.Spec.Name); err != nil {
+		log.Error(err, fmt.Sprintf("unable to emit Repo (%s/%s) metrics", repo.Spec.Owner, repo.Spec.Name))
+		return ctrl.Result{}, err
+	}
 
 	repo.Status.State = ptr.String("Synchronized")
 	repo.Status.LastQuery = metav1.Now()
@@ -62,7 +68,7 @@ func (r *RepoReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{RequeueAfter: 5 * time.Minute}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
