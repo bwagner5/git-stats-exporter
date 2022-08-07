@@ -9,6 +9,45 @@ The Git stats exporter is a Kubernetes controller that fetches Github statistics
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
 **Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
 
+## Example:
+
+
+```
+$ kubectl get repo aws-ec2-instance-selector -o yaml
+apiVersion: src.bwag.me/v1
+kind: Repo
+metadata:
+  name: aws-ec2-instance-selector
+spec:
+  owner: aws
+  name: amazon-ec2-instance-selector
+  ghTokenSecretRef: gh-token
+status:
+  lastQuery: "2022-08-07T17:34:45Z"
+  state: Synchronized
+```
+
+```
+$ curl git-stats-exporter:8080/metrics
+...
+# HELP gh_repo_forks Number of forks
+# TYPE gh_repo_forks gauge
+gh_repo_forks{owner="aws",repo="amazon-ec2-instance-selector"} 67
+# HELP gh_repo_open_issues Number of open issues
+# TYPE gh_repo_open_issues gauge
+gh_repo_open_issues{owner="aws",repo="amazon-ec2-instance-selector"} 11
+# HELP gh_repo_open_pull_requests Number of open pull requests
+# TYPE gh_repo_open_pull_requests gauge
+gh_repo_open_pull_requests{owner="aws",repo="amazon-ec2-instance-selector"} 1
+# HELP gh_repo_stars Number of stars
+# TYPE gh_repo_stars gauge
+gh_repo_stars{owner="aws",repo="amazon-ec2-instance-selector"} 406
+# HELP gh_repo_subscribers Number of subscribers
+# TYPE gh_repo_subscribers gauge
+gh_repo_subscribers{owner="aws",repo="amazon-ec2-instance-selector"} 11
+...
+```
+
 ### Running on the cluster
 1. Setup a Github Token as a K8s Secret (optional)
 
