@@ -1,27 +1,38 @@
 # git-stats-exporter
-// TODO(user): Add simple overview of use/purpose
+Fetch and emit github stats as prometheus metrics.
+
 
 ## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+The Git stats exporter is a Kubernetes controller that fetches Github statistics like open pull requests, issues, stars, etc. and emits them as prometheus metrics to build nice dashboards.
 
 ## Getting Started
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
 **Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
 
 ### Running on the cluster
-1. Install Instances of Custom Resources:
+1. Setup a Github Token as a K8s Secret (optional)
+
+The github API has a fairly low API request limit, so setting up a github token can be useful if you are monitoring more than on repository.
+https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+
+```sh
+echo -n "<gh-token>" > /tmp/gh-token
+kubectl create secret generic gh-token --from-file /tmp/gh-token
+```
+
+2. Install Sample Repos (or create your own):
 
 ```sh
 kubectl apply -f config/samples/
 ```
 
-2. Build and push your image to the location specified by `IMG`:
+3. Build and push your image to the location specified by `IMG`:
 	
 ```sh
 make docker-build docker-push IMG=<some-registry>/git-stats-exporter:tag
 ```
 	
-3. Deploy the controller to the cluster with the image specified by `IMG`:
+4. Deploy the controller to the cluster with the image specified by `IMG`:
 
 ```sh
 make deploy IMG=<some-registry>/git-stats-exporter:tag
@@ -41,14 +52,10 @@ UnDeploy the controller to the cluster:
 make undeploy
 ```
 
-## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
 
 ### How it works
-This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
+Create `Repo` resources that point to your Github repositories and collect the metrics with prometheus.
 
-It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/) 
-which provides a reconcile function responsible for synchronizing resources untile the desired state is reached on the cluster 
 
 ### Test It Out
 1. Install the CRDs into the cluster:
