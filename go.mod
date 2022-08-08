@@ -1,4 +1,4 @@
-module bwag.me/git-stats-exporter
+module github.com/bwagner5/git-stats-exporter
 
 go 1.18
 

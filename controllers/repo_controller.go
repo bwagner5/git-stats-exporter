@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	srcv1 "bwag.me/git-stats-exporter/api/v1"
-	"bwag.me/git-stats-exporter/pkg/repos"
+	srcv1 "github.com/bwagner5/git-stats-exporter/api/v1"
+	"github.com/bwagner5/git-stats-exporter/pkg/repos"
 )
 
 // RepoReconciler reconciles a Repo object

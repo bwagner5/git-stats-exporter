@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	srcv1 "bwag.me/git-stats-exporter/api/v1"
-	"bwag.me/git-stats-exporter/controllers"
+	"github.com/bwagner5/git-stats-exporter/controllers"
+	srcv1 "github.com/bwagner5/git-stats-exporter/controllers/git-stats-exporter/api/v1"
 	//+kubebuilder:scaffold:imports
 )
 

@@ -31,7 +31,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	srcv1 "bwag.me/git-stats-exporter/api/v1"
+	srcv1 "github.com/bwagner5/git-stats-exporter/api/v1"
 	//+kubebuilder:scaffold:imports
 )
 
