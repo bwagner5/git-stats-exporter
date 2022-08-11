@@ -44,6 +44,7 @@ type RepoReconciler struct {
 //+kubebuilder:rbac:groups=src.bwag.me,resources=repos,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=src.bwag.me,resources=repos/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=src.bwag.me,resources=repos/finalizers,verbs=update
+//+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
 
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
