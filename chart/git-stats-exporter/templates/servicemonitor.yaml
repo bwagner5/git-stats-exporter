@@ -1,12 +1,11 @@
-
 # Prometheus Monitor Service (Metrics)
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    control-plane: controller-manager
-  name: controller-manager-metrics-monitor
-  namespace: system
+    {{- include "git-stats-exporter.labels" . | nindent 4 }}
+  name: git-stats-exporter-metrics-monitor
+  namespace: {{ .Release.Namespace }}
 spec:
   endpoints:
     - path: /metrics
@@ -17,4 +16,5 @@ spec:
         insecureSkipVerify: true
   selector:
     matchLabels:
-      control-plane: controller-manager
+      {{- include "git-stats-exporter.selectorLabels" . | nindent 6 }}
+

@@ -14,13 +14,13 @@ COPY main.go main.go
 COPY pkg/ pkg/
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o manager main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o git-stats-exporter main.go
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /
-COPY --from=builder /workspace/manager .
+COPY --from=builder /workspace/git-stats-exporter .
 USER 65532:65532
 
-ENTRYPOINT ["/manager"]
+ENTRYPOINT ["/git-stats-exporter"]
