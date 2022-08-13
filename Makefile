@@ -52,7 +52,7 @@ verify:
 	go vet ./...	
 
 .PHONY: test
-test: manifests generate fmt vet envtest ## Run tests.
+test: manifests generate verify envtest ## Run tests.
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./... -coverprofile cover.out
 
 ##@ Build

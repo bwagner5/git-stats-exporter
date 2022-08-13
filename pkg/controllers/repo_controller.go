@@ -78,7 +78,7 @@ func (r *RepoReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		repoMetrics = repos.New(ctx, nil)
 	}
 
-	if err := repoMetrics.EmitMetrics(ctx, repo.Spec.Owner, repo.Spec.Name); err != nil {
+	if err := repoMetrics.EmitMetrics(ctx, repo.Spec.Owner, repo.Spec.Name, repo.Status.LastQuery.Time); err != nil {
 		log.Error(err, fmt.Sprintf("unable to emit Repo (%s/%s) metrics", repo.Spec.Owner, repo.Spec.Name))
 		return ctrl.Result{}, err
 	}

@@ -2,6 +2,7 @@ package repos
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -14,39 +15,40 @@ import (
 
 var (
 	repoLabelNames = []string{"owner", "repo"}
-	issuesGauge    = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "gh_repo_open_issues",
-			Help: "Number of open issues",
-		},
+	issuesGauge    = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "gh_repo_open_issues",
+		Help: "Number of open issues",
+	},
 		repoLabelNames,
 	)
-	prsGauge = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "gh_repo_open_pull_requests",
-			Help: "Number of open pull requests",
-		},
+	issuesHist = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "gh_repo_issues_duration",
+		Help:    "Duration from issues open to close in minutes",
+		Buckets: []float64{60, 1_440, 10_080, 20_160, 40_320, 80_640, 161_280},
+	}, repoLabelNames,
+	)
+	prsGauge = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "gh_repo_open_pull_requests",
+		Help: "Number of open pull requests",
+	},
 		repoLabelNames,
 	)
-	starsGauge = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "gh_repo_stars",
-			Help: "Number of stars",
-		},
+	starsGauge = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "gh_repo_stars",
+		Help: "Number of stars",
+	},
 		repoLabelNames,
 	)
-	forksGauge = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "gh_repo_forks",
-			Help: "Number of forks",
-		},
+	forksGauge = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "gh_repo_forks",
+		Help: "Number of forks",
+	},
 		repoLabelNames,
 	)
-	subscribersGauge = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "gh_repo_subscribers",
-			Help: "Number of subscribers",
-		},
+	subscribersGauge = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "gh_repo_subscribers",
+		Help: "Number of subscribers",
+	},
 		repoLabelNames,
 	)
 )
@@ -56,15 +58,16 @@ type Repos struct {
 }
 
 type RepoMetrics struct {
-	OpenIssues  int
-	OpenPRs     int
-	Stars       int
-	Forks       int
-	Subscribers int
+	OpenIssues     int
+	IssueDurations []time.Duration
+	OpenPRs        int
+	Stars          int
+	Forks          int
+	Subscribers    int
 }
 
 func init() {
-	metrics.Registry.MustRegister(prsGauge, issuesGauge, starsGauge, forksGauge, subscribersGauge)
+	metrics.Registry.MustRegister(prsGauge, issuesGauge, issuesHist, starsGauge, forksGauge, subscribersGauge)
 }
 
 func New(ctx context.Context, ghToken []byte) *Repos {
@@ -78,21 +81,25 @@ func New(ctx context.Context, ghToken []byte) *Repos {
 	return &Repos{client: client}
 }
 
-func (r *Repos) EmitMetrics(ctx context.Context, owner string, repoName string) error {
-	ghRepo, err := r.GetMetrics(ctx, owner, repoName)
+func (r *Repos) EmitMetrics(ctx context.Context, owner string, repoName string, lastUpdated time.Time) error {
+	ghRepo, err := r.GetMetrics(ctx, owner, repoName, lastUpdated)
 	if err != nil {
 		return err
 	}
 	repoLabels := prometheus.Labels{"owner": owner, "repo": repoName}
 	prsGauge.With(repoLabels).Set(float64(ghRepo.OpenPRs))
 	issuesGauge.With(repoLabels).Set(float64(ghRepo.OpenIssues))
+	for _, issueDuration := range ghRepo.IssueDurations {
+		issuesHist.With(repoLabels).Observe(issueDuration.Minutes())
+	}
 	starsGauge.With(repoLabels).Set(float64(ghRepo.Stars))
 	forksGauge.With(repoLabels).Set(float64(ghRepo.Forks))
 	subscribersGauge.With(repoLabels).Set(float64(ghRepo.Subscribers))
+	fmt.Printf("%+v", ghRepo)
 	return nil
 }
 
-func (r *Repos) GetMetrics(ctx context.Context, owner string, repoName string) (*RepoMetrics, error) {
+func (r *Repos) GetMetrics(ctx context.Context, owner string, repoName string, lastUpdated time.Time) (*RepoMetrics, error) {
 	ghRepo, _, err := r.client.Repositories.Get(ctx, owner, repoName)
 	if err != nil {
 		return nil, err
@@ -105,12 +112,21 @@ func (r *Repos) GetMetrics(ctx context.Context, owner string, repoName string) (
 	if err != nil {
 		return nil, err
 	}
+	openIssues := lo.Filter(issues, func(issue *github.Issue, _ int) bool { return issue.GetState() == "open" })
+	closedIssuesSinceLastUpdate := lo.Filter(issues, func(issue *github.Issue, _ int) bool {
+		return issue.GetState() == "closed" && issue.GetClosedAt().UnixMilli() > lastUpdated.UnixMilli()
+	})
+	var issueDurations []time.Duration
+	for _, issue := range closedIssuesSinceLastUpdate {
+		issueDurations = append(issueDurations, issue.ClosedAt.Sub(*issue.CreatedAt))
+	}
 	return &RepoMetrics{
-		OpenIssues:  len(issues),
-		OpenPRs:     len(prs),
-		Stars:       ghRepo.GetStargazersCount(),
-		Forks:       ghRepo.GetForksCount(),
-		Subscribers: ghRepo.GetSubscribersCount(),
+		OpenIssues:     len(openIssues),
+		IssueDurations: issueDurations,
+		OpenPRs:        len(prs),
+		Stars:          ghRepo.GetStargazersCount(),
+		Forks:          ghRepo.GetForksCount(),
+		Subscribers:    ghRepo.GetSubscribersCount(),
 	}, nil
 }
 
@@ -138,7 +154,7 @@ func (r *Repos) getPRs(ctx context.Context, owner string, repoName string) ([]*g
 func (r *Repos) getIssues(ctx context.Context, owner string, repoName string) ([]*github.Issue, error) {
 	var allIssues []*github.Issue
 	opt := &github.IssueListByRepoOptions{
-		State:       "open",
+		State:       "all",
 		ListOptions: github.ListOptions{PerPage: 30},
 	}
 	// get all pages of results
