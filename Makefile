@@ -73,6 +73,14 @@ docker-build: test ## Build docker image with the manager.
 docker-push: ## Push docker image with the manager.
 	docker push ${IMG}
 
+.PHONY: kind-load-img
+kind-load-img: ## load the container image into kind cluster
+	kind load docker-image ${IMG}
+
+.PHONY: kind-reload
+kind-reload: uninstall undeploy docker-build kind-load-img install deploy ## reload the kind deployment
+	kubectl apply -f samples/
+
 ##@ Deployment
 
 ifndef ignore-not-found
