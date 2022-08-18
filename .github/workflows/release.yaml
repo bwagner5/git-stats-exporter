@@ -31,6 +31,7 @@ jobs:
         chmod 700 get_helm.sh
         ./get_helm.sh
         helm package --app-version ${GITHUB_REF#refs/*/} --version ${GITHUB_REF#refs/*/}  chart/git-stats-exporter/
+        git fetch --all
         git checkout gh-pages
         helm repo index --merge index.yaml .
         git add git-stats-exporter-*
