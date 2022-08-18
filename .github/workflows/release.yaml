@@ -24,9 +24,16 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build and push the Docker image
       run: |
-        docker build . --file Dockerfile --tag git-stats-exporter:${GITHUB_REF#refs/*/}
-        docker tag git-stats-exporter:${GITHUB_REF#refs/*/} ghcr.io/bwagner5/git-stats-exporter:${GITHUB_REF#refs/*/}
-        docker push ghcr.io/bwagner5/git-stats-exporter:${GITHUB_REF#refs/*/}
+        docker build . --file Dockerfile --build-arg GOARCH=amd64 --tag git-stats-exporter:amd64-${GITHUB_REF#refs/*/}
+        docker build . --file Dockerfile --build-arg GOARCH=arm64 --tag git-stats-exporter:arm64-${GITHUB_REF#refs/*/}
+        docker tag git-stats-exporter:amd64-${GITHUB_REF#refs/*/} ghcr.io/bwagner5/git-stats-exporter:amd64-${GITHUB_REF#refs/*/}
+        docker tag git-stats-exporter:arm64-${GITHUB_REF#refs/*/} ghcr.io/bwagner5/git-stats-exporter:arm64-${GITHUB_REF#refs/*/}
+        docker push ghcr.io/bwagner5/git-stats-exporter:amd64-${GITHUB_REF#refs/*/}
+        docker push ghcr.io/bwagner5/git-stats-exporter:arm64-${GITHUB_REF#refs/*/}
+        docker manifest create ghcr.io/bwagner5/git-stats-exporter:${GITHUB_REF#refs/*/} \
+          --amend ghcr.io/bwagner5/git-stats-exporter:amd64-${GITHUB_REF#refs/*/} \
+          --amend ghcr.io/bwagner5/git-stats-exporter:arm64-${GITHUB_REF#refs/*/}
+        docker manifest push ghcr.io/bwagner5/git-stats-exporter:${GITHUB_REF#refs/*/}
         curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
         chmod 700 get_helm.sh
         ./get_helm.sh
@@ -36,7 +43,7 @@ jobs:
         git config user.name "Brandon Bot"
         git checkout gh-pages
         helm repo index --merge index.yaml .
-        git add git-stats-exporter-*
+        git add git-stats-exporter-* index.yaml
         git commit -m "publish git-stats-exporter ${GITHUB_REF#refs/*/}"
         git push -u origin gh-pages
         
