@@ -2,8 +2,18 @@ apiVersion: v1
 entries:
   git-stats-exporter:
   - apiVersion: v2
+    appVersion: v0.0.8
+    created: "2022-08-18T06:47:09.778828792Z"
+    description: A Helm chart for Kubernetes
+    digest: f549ce2651f7f5db2b0e58fe8c15b2c98f98580919de23052af83032b38c787b
+    name: git-stats-exporter
+    type: application
+    urls:
+    - git-stats-exporter-v0.0.8.tgz
+    version: v0.0.8
+  - apiVersion: v2
     appVersion: v0.0.7
-    created: "2022-08-18T06:37:27.188621414Z"
+    created: "2022-08-18T06:47:09.777968626Z"
     description: A Helm chart for Kubernetes
     digest: 25586add59c4faa5f7a6cab50015939530b0e3a5f521ddceec79281ca4dbe9f4
     name: git-stats-exporter
@@ -13,7 +23,7 @@ entries:
     version: v0.0.7
   - apiVersion: v2
     appVersion: v0.0.6
-    created: "2022-08-18T06:37:27.188149907Z"
+    created: "2022-08-18T06:47:09.777180767Z"
     description: A Helm chart for Kubernetes
     digest: 0788ac68dd16cd447627b42946808d07d63304ab81432fe5b7b88d47fad288f9
     name: git-stats-exporter
@@ -21,4 +31,4 @@ entries:
     urls:
     - git-stats-exporter-v0.0.6.tgz
     version: v0.0.6
-generated: "2022-08-18T06:37:27.187461898Z"
+generated: "2022-08-18T06:47:09.776472013Z"
