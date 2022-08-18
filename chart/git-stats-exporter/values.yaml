@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: git-stats-exporter
+  repository: ghcr.io/bwagner5/git-stats-exporter
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "v0.0.8"
 
 imagePullSecrets: []
 nameOverride: ""

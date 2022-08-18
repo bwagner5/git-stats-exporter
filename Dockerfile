@@ -13,8 +13,11 @@ RUN go mod download
 COPY main.go main.go
 COPY pkg/ pkg/
 
+ARG GOARCH=amd64
+ARG GOOS=linux
+ARG CGO_ENABLED=0
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o git-stats-exporter main.go
+RUN go build -a -o git-stats-exporter main.go
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
