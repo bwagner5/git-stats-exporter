@@ -97,7 +97,7 @@ uninstall: manifests ## Uninstall CRDs from the K8s cluster specified in ~/.kube
 
 .PHONY: deploy
 deploy: manifests ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	helm upgrade --install git-stats-exporter chart/git-stats-exporter/ -n git-stats-exporter --create-namespace
+	helm upgrade --install git-stats-exporter chart/git-stats-exporter/ -n git-stats-exporter --create-namespace --set image.repository=git-stats-exporter --set image.tag=latest
 
 .PHONY: undeploy
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
