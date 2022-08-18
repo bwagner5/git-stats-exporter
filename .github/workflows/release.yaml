@@ -32,6 +32,8 @@ jobs:
         ./get_helm.sh
         helm package --app-version ${GITHUB_REF#refs/*/} --version ${GITHUB_REF#refs/*/}  chart/git-stats-exporter/
         git fetch --all
+        git config user.email "bwagner5@users.noreply.github.com"
+        git config user.name "Brandon Bot"
         git checkout gh-pages
         helm repo index --merge index.yaml .
         git add git-stats-exporter-*
